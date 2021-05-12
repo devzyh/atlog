@@ -1,0 +1,150 @@
+{% define "tag" %}
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+		<title>笔记标签 - AtLog</title>
+		<link rel="stylesheet" href="/static/layui/css/layui.css">
+		<link rel="stylesheet" href="/static/man/css/style.css">
+		<style>
+			.layui-table-body{overflow:hidden;}
+		</style>
+	</head>
+
+	<body class="layui-layout-body">
+		<div class="layui-layout layui-layout-admin">
+			{% template "head" . %}
+			<div class="layui-body">
+				<fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+					<legend>笔记标签</legend>
+				</fieldset>
+				<form class="layui-form" action="">
+					<div class="layui-form-item">
+						<button type="button" class="layui-btn layui-btn-sm" id="btnAddTag">
+							<i class="layui-icon layui-icon-add-1"></i> 新增标签
+						</button>
+					</div>
+				</form>
+				<table class="layui-hide" id="tbTag" lay-filter="tbTag"></table>
+				<script type="text/html" id="barOpt">
+					<a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="show">查看</a>
+					<a class="layui-btn layui-btn-xs" lay-event="edit">改名</a>
+					<a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+				</script>
+			</div>
+			{% template "foot" . %}
+		</div>
+	</body>
+
+	<script>
+		layui.use(['jquery', 'table', 'laydate'], function() {
+			var $ = layui.$;
+			var table = layui.table;
+			var laydate = layui.laydate;
+			$("#nav-tag").addClass('layui-this');
+
+			// 表格渲染
+			var tbTag = table.render({
+				elem: '#tbTag',
+				cols: [
+					[{
+						field: 'TName',
+						sort: true,
+						align: 'center',
+						title: '标签名称'
+					}, {
+						field: 'TCount',
+						align: 'center',
+						title: '关联文章数量'
+					}, {
+						//fixed: 'right',
+						align: 'center',
+						toolbar: '#barOpt',
+						title: '工具栏'
+					}]
+				],
+				url: '/rest/tag',
+				page: false
+			});
+
+			//监听工具条
+			table.on('tool(tbTag)', function(obj) {
+				var data = obj.data;
+				if (obj.event === 'show') {
+					window.open("/list/"+data.TID+".html");
+				} else if (obj.event === 'del') {
+					layer.confirm('确定删除当前标签及文章的关联 ？', function(index) {
+						$.ajax({
+							type: "DELETE",
+							url: "/rest/tag",
+							contentType: 'application/json;charset=utf-8',
+							data: JSON.stringify({
+								TID: data.TID
+							}),
+							dataType: "json",
+							success: function(res) {
+								if (res.Status == true) {
+									layer.close(index)
+									obj.del();
+								} else {
+									layer.msg(res.Message + "!");
+								}
+							}
+						});
+					});
+				} else if (obj.event === 'edit') {
+					layer.prompt({
+					  title: '请输入新的标签名'
+					}, function(value, index, elem){
+					  $.ajax({
+					  	type: "PUT",
+					  	url: "/rest/tag",
+					  	contentType: 'application/json;charset=utf-8',
+					  	data: JSON.stringify({
+							TName:value,
+							TID: data.TID
+					  	}),
+					  	dataType: "json",
+					  	success: function(res) {
+					  		if (res.Status == true) {
+					  			layer.close(index);
+								tbTag.reload();
+					  		} else {
+					  			layer.msg(res.Message + "!");
+					  		}
+					  	}
+					  });
+					});
+				}
+			});
+			
+			// 添加标签
+			$("#btnAddTag").click(function(){
+				layer.prompt({
+				  title: '请输入待添加的标签名'
+				}, function(value, index, elem){
+				  $.ajax({
+				  	type: "POST",
+				  	url: "/rest/tag",
+				  	contentType: 'application/json;charset=utf-8',
+				  	data: JSON.stringify({
+				  		TName: value
+				  	}),
+				  	dataType: "json",
+				  	success: function(res) {
+				  		if (res.Status == true) {
+				  			layer.close(index);
+							tbTag.reload();
+				  		} else {
+				  			layer.msg(res.Message + "!");
+				  		}
+				  	}
+				  });
+				});
+			});
+			
+		});
+	</script>
+</html>
+{% end %}

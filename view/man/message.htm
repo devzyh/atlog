@@ -1,0 +1,179 @@
+{% define "message" %}
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+		<title>消息互动 - AtLog</title>
+		<link rel="stylesheet" href="/static/layui/css/layui.css">
+		<link rel="stylesheet" href="/static/man/css/style.css">
+	</head>
+
+	<body class="layui-layout-body">
+		<div class="layui-layout layui-layout-admin">
+			{% template "head" . %}
+			<div class="layui-body">
+				<fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+					<legend>消息互动</legend>
+				</fieldset>
+				<form class="layui-form" action="">
+					<div class="layui-form-item">
+						<button type="button" class="layui-btn layui-btn-sm layui-btn-danger" id="deltalk">
+							<i class="layui-icon layui-icon-delete"></i> 批量删除
+						</button>
+					</div>
+				</form>
+				<table class="layui-hide" id="tbTalk" lay-filter="tbTalk"></table>
+				<script type="text/html" id="barOpt">
+					{{#  if(!d.Review){ }}
+						<a class="layui-btn layui-btn-xs" lay-event="pass">通过</a>
+					{{#  } }}
+						<a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+				</script>
+			</div>
+			{% template "foot" . %}
+		</div>
+	</body>
+
+	<script>
+		layui.use(['jquery', 'table', 'laydate'], function() {
+			var $ = layui.$;
+			var table = layui.table;
+			var layer = layui.layer;
+			var laydate = layui.laydate;
+			$("#nav-talk").addClass('layui-this');
+
+			// 表格渲染
+			var tbTalk = table.render({
+				elem: '#tbTalk',
+				height: 'full-235',
+				cols: [
+					[{
+						type: 'checkbox',
+						fixed: 'left'
+					}, {
+						field: 'MID',
+						hide: true
+					}, {
+						field: 'MNick',
+						sort: true,
+						width: 120,
+						title: '昵称'
+					}, {
+						field: 'MMark',
+						width: 150,
+						title: '签名'
+					}, {
+						field: 'MText',
+						title: '内容'
+					}, {
+						field: 'MIP',
+						sort: true,
+						width: 150,
+						title: '地址'
+					}, {
+						field: 'Review',
+						hide: true
+					}, {
+						fixed: 'right',
+						align: 'center',
+						width: 120,
+						toolbar: '#barOpt',
+						title: '工具栏'
+					}]
+				],
+				url: '/rest/message',
+				page: true,
+				limit: 20
+			});
+			
+			function changeReviews(){
+				if ($("#msg-reviews")){
+					newTxt = $("#msg-reviews").text() - 1;
+					if (newTxt > 0) {
+						$("#msg-reviews").text(newTxt);
+					}else{
+						$("#msg-reviews").remove();
+					}
+				}
+			}
+
+			// 监听工具条
+			table.on('tool(tbTalk)', function(obj) {
+				var data = obj.data;
+				if (obj.event === 'pass') {
+					layer.confirm('是否批准 ' + data.MNick + ' 的评论 ？', function(index) {
+						$.ajax({
+							type: "PUT",
+							url: "/rest/message/review",
+							contentType: 'application/json;charset=utf-8',
+							data: JSON.stringify([data.MID]),
+							dataType: "json",
+							success: function(res) {
+								if (res.Status == true) {
+									layer.close(index);
+									tbTalk.reload();
+									changeReviews();
+								} else {
+									layer.msg(res.Message + "!");
+								}
+							}
+						});
+					});
+				}
+				if (obj.event === 'del') {
+					layer.confirm('确定删除 ' + data.MNick + ' 的评论 ？', function(index) {
+						$.ajax({
+							type: "DELETE",
+							url: "/rest/message",
+							contentType: 'application/json;charset=utf-8',
+							data: JSON.stringify([data.MID]),
+							dataType: "json",
+							success: function(res) {
+								if (res.Status == true) {
+									layer.close(index)
+									obj.del();
+									if(!data.Review){
+										changeReviews();
+									}
+								} else {
+									layer.msg(res.Message + "!");
+								}
+							}
+						});
+					});
+				}
+			});
+
+			$('#deltalk').on('click', function() {
+				var selData = table.checkStatus('tbTalk').data;
+				if (selData.length == 0){
+					layer.msg("请选择您要操作的数据!");
+					return;
+				}
+				var ids = new Array()
+				for(var i=0;i<selData.length;i++){
+					ids.push(selData[i].MID);
+				}
+				layer.confirm('确定删除选中的评论 ？', function(index) {
+					$.ajax({
+						type: "DELETE",
+						url: "/rest/message",
+						contentType: 'application/json;charset=utf-8',
+						data: JSON.stringify(ids),
+						dataType: "json",
+						success: function(res) {
+							if (res.Status == true) {
+								layer.close(index);
+								location.reload()
+							} else {
+								layer.msg(res.Message + "!");
+							}
+						}
+					});
+				});
+			});
+		});
+	</script>
+</html>
+{% end %}

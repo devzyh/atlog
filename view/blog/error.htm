@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<title>404 NotFound - {% .HTML.TITLE %}</title>
+		<meta name="keywords" content="{% .HTML.KEYWORD %}">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<link rel="stylesheet" href="/static/layui/css/layui.css">
+		<link rel="stylesheet" href="/static/blog/css/main.css">
+	</head>
+	<body class="lay-blog">
+
+		{% template "head.htm" .%}
+		
+		<div class="container-wrap">
+			<div class="container">
+				<div class="contar-wrap" style="line-height: 50px;">
+					<div style="padding: 150px 0 50px; text-align: center; font-size: 30px; color: #ccc; font-weight: 300;">
+						 Sorry， 服务器页面跑丢了...
+					</div>
+					<div style="text-align: center;">
+						<button class="layui-btn layui-btn-primary" onclick="window.history.back(-1)">返回上页</button>
+						<button class="layui-btn layui-btn-primary" onclick="self.location='/'">返回首页</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		{% template "foot.htm" .%}
+
+	</body>
+</html>

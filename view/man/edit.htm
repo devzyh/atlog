@@ -1,0 +1,256 @@
+{% define "edit" %}
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+		<title>Markdown编辑器 - AtLog</title>
+		<link rel="stylesheet" href="/static/layui/css/layui.css">
+		<link rel="stylesheet" href="/static/man/css/style.css">
+		<link rel="stylesheet" href="/static/sme/simplemde.min.css" />
+		<link rel="stylesheet" href="/static/sme/github.css" />
+	</head>
+	<body class="layui-layout-body">
+		<div class="layui-layout layui-layout-admin">
+			{% template "head" . %}
+			<div class="layui-body">
+				<div style="padding: 15px;">
+					<form class="layui-form" action="">
+						<div class="layui-form-item">
+							<input type="text" id="title" placeholder="请输入标题 ..." value="{% .Data.NTitle %}" class="layui-input">
+						</div>
+
+						<div class="layui-form-item">
+							<textarea id="sme"></textarea>
+						</div>
+
+						<div >
+							<div class="layui-row layui-col-space15">
+								<div class="layui-col-md6">
+									<div class="layui-card" style="height: 125px;border: 1px solid #eee">
+										<div class="layui-card-body">
+											<div class="layui-form-item">
+												<div class="layui-inline">
+													<div class="layui-input-inline" style="width: 275px;">
+														<select name="intag" lay-verify="required" lay-filter="intag" lay-search="">
+															<option value="">选择笔记标签</option>
+															{% range .TagAll %}
+															<option value="{% .TID %}" >{% .TName %}</option>
+															{% end %}
+														</select>
+													</div>
+												</div>
+											</div>
+											<div class="layui-form-item" id="tagArea">
+												{% if eq .Data.NID 0 %}
+												<div class="layui-btn-group" id="notag">
+													<button type="button" class="layui-btn layui-btn-primary layui-btn-sm">无标签</button>
+													<button type="button" disabled class="layui-btn layui-btn-primary layui-btn-sm layui-disabled"><i class="layui-icon layui-icon-delete"></i></button>
+												</div>
+												{% else %}
+													{% range .Data.Tags %}
+													<div class="layui-btn-group">
+														<button type="button" class="layui-btn layui-btn-primary layui-btn-sm">{% .TName %}</button>
+														<button type="button" class="layui-btn layui-btn-primary layui-btn-sm" id="delTag" data-tid="{% .TID %}" ><i class="layui-icon layui-icon-delete"></i></button>
+													</div>
+												{% end %}
+												{% end %}
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="layui-col-md6">
+									<div class="layui-card" style="border: 1px solid #eee">
+										<div class="layui-card-body">
+											<div class="layui-form-item">
+												<div class="layui-form-mid">发布时间</div>
+												<div class="layui-input-inline" style="width: 275px;">
+													<input type="text" id="uptime" value="{% .Data.NTime %}" class="layui-input">
+												</div>
+											</div>
+											<div class="layui-form-item">
+
+												<label class="layui-form-mid">单页路径</label>
+												<div class="layui-input-inline" style="width: 275px;">
+													{% if .Data.Single %}
+													<input type="text" id="pageurl" placeholder="/page/{url}.html" value="{% .Data.NUrl %}" class="layui-input">
+													{% else %}
+													<input type="text" id="pageurl" placeholder="笔记禁止定义路径" disabled="disabled" class="layui-input layui-disabled">
+													{% end %}
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<div class="layui-form-item">
+							<div class="layui-inline">
+								<input type="checkbox" id="notalk" title="允许互动" {% if not .Data.NoTalk %} checked="checked" {% end %} />
+							</div>
+							<div class="pull-right">
+								<button type="button" class=" layui-btn layui-btn-warm" id="btnDraft"><i class="layui-icon layui-icon-star"></i>存为草稿</button>
+								<button type="button" class="layui-btn" id="btnPost"><i class="layui-icon layui-icon-release"></i> 立即发布
+								</button>
+							</div>
+						</div>
+
+					</form>
+				</div>
+			</div>
+			{% template "foot" . %}
+		</div>
+		<script src="/static/sme/simplemde.js"></script>
+		<script>
+			layui.use(['layer', 'jquery', 'laydate', 'form'], function() {
+				var layer = layui.layer;
+				var $ = layui.$;
+				var laydate = layui.laydate;
+				var layform = layui.form;
+				var tags = new Array();
+				var bSave = false;
+				var bChange = false;
+				{% range .Data.Tags %}
+				tags.push({% .TID %});
+				{% end %}
+
+				$("#nav-edit").addClass('layui-this');
+
+				// Markdwon编辑器
+				var simplemde = new SimpleMDE({
+					element: document.getElementById("sme"),
+					toolbar:  [
+						"bold", "italic", "strikethrough", "heading", "code", "quote",
+						"unordered-list", "ordered-list", "link", "image", "preview", "guide"
+					],
+					spellChecker: false,
+					status: false,
+					upload:"/rest/note/img"
+				});
+				simplemde.value("{% .Data.NText %}");
+
+				// 时间选择器
+				laydate.render({
+					elem: '#uptime',
+					type: 'datetime'
+				});
+
+				// 退出检测
+				simplemde.codemirror.on("change", function(){
+					bChange = true;
+				});
+				$(window).bind('beforeunload',function(){
+					if (!bSave&&bChange) return "";
+
+				});
+
+				// 标签删除
+				$("#tagArea").on("click", "#delTag", function() {
+					var tmpTag = $(this).attr("data-tid");
+					for (var i = 0; i < tags.length; i++) {
+						if (tags[i] == tmpTag) {
+							tags.splice(i, 1);
+							$(this).parent().remove();
+						}
+					}
+				});
+
+				// 添加标签
+				layform.on('select(intag)', function(data) {
+					if (data.value.trim() == "") return;
+					if (tags.indexOf(data.value) != -1) {
+						layer.msg("请勿重复选择标签！")
+						return;
+					}
+					tags.push(data.value);
+					$("#tagArea").empty();
+					$.each(tags, function(key, val) {
+						var html =
+							'<div class="layui-btn-group"><button type="button" class="layui-btn layui-btn-primary layui-btn-sm">' +
+							$('option[value='+val+']').text() +
+							'</button><button type="button" class="layui-btn layui-btn-primary layui-btn-sm" id="delTag" data-tid="'+val+
+							'"><i class="layui-icon layui-icon-delete"></i></button>L</div>';
+						$("#tagArea").append(html);
+					});
+				});
+
+				// 发布页面
+				function postText(isDraft) {
+					if (!$("#title").val().trim()) {
+						layer.msg("请输入标题！");
+						return;
+					}
+					var txt = simplemde.value();
+					if (!txt.trim()) {
+						layer.msg("请输入笔记内容！");
+						return;
+					}
+					if (!isNaN(txt.trim())) {
+						txt = '# ' + txt;
+					}
+					if (tags.length <= 0 && !{% .Data.Single %}) {
+						layer.msg("请选择关联的标签！");
+						return;
+					}
+					if (!$("#uptime").val().trim()) {
+						layer.msg("请选择发布时间！");
+						return;
+					}
+					if ({% .Data.Single %} && !$("#pageurl").val().trim()){
+						layer.msg("请指定页面访问路径！");
+						return;
+					}
+
+					var tagsJson = '[';
+					for(i = 0; i< tags.length; i++) {
+						tagsJson += '{TID:'+tags[i]+'}';
+						if(i!=(tags.length-1)){
+							tagsJson += ',';
+						}
+					}
+					tagsJson += ']';
+					if(tags.length==0){
+						tagsJson = null;
+					}
+
+					$.ajax({
+						type: "POST",
+						url: "/rest/note",
+						contentType: 'application/json;charset=utf-8',
+						data: JSON.stringify({
+							"NID": {% .Data.NID %},
+							"NUrl": $("#pageurl").val(),
+							"NTitle": $("#title").val(),
+							"NText": txt,
+							"NTime": $("#uptime").val(),
+							"Draft": isDraft,
+							"Single": {% .Data.Single %},
+							"NoTalk": !$("#notalk").prop("checked"),
+							"Tags": eval(tagsJson)
+						}),
+						dataType: "json",
+						success: function(data) {
+							layer.alert(data.Message, function(index){
+								if (data.Status){
+									bSave = true;
+									location.href="./"+data.Data;
+								}
+							  layer.close(index);
+							});
+						}
+					});
+				}
+
+				$("#btnDraft").click(function() {
+					postText(true);
+				});
+
+				$("#btnPost").click(function() {
+					postText(false);
+				});
+			});
+		</script>
+	</body>
+</html>
+{% end %}

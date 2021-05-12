@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<title>{% .HTML.TITLE %}</title>
+		<meta name="keywords" content="{% .HTML.KEYWORD %}">
+		<meta name='description' content="{% .HTML.DESCRIPTION %}">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<link rel="stylesheet" href="/static/layui/css/layui.css">
+		<link rel="stylesheet" href="/static/blog/css/main.css">
+	</head>
+	<body class="lay-blog">
+		{% template "head.htm" .%}
+		<div class="container-wrap">
+			<div class="container">
+				<div class="contar-wrap">
+					{% if ne .HTML.TIPMSG "" %}
+					<h4 class="item-title">
+						<p><i class="layui-icon layui-icon-speaker"></i>公告：<span>
+								{% .HTML.TIPMSG %}</span></p>
+					</h4>
+					{% end %}
+
+					{% range .Data %}
+					<div class="item">
+						<div class="item-box layer-photos-demo1 layer-photos-demo">
+							<h3><a href="/page/{% .NID %}.html">
+									{% .NTitle %}</a></h3>
+							<h5>发布于：
+								<span>
+									{% .NTime %}
+								</span>
+							</h5>
+							<p class="max">
+								{% .NText %}
+								{% if ne .NImage "" %}
+									<img src="{% .NImage %}" style="width: 100%;border-radius: 1.5px;margin-top: 5px">
+								{% end %}
+							</p>
+						</div>
+						<div class="comment count">
+							<a href="/page/{% .NID %}.html" class="like">查看</a>
+							<a href="/page/{% .NID %}.html#comment">评论</a>
+						</div>
+					</div>
+					{% end %}
+				</div>
+				<div class="item-btn">
+					{% if gt .Nav.Current 1 %}
+					<a class="layui-btn layui-btn-normal" href="/index.html?page={% .Nav.Prev %}">上一页</a>
+					{% end %}
+					{% if lt .Nav.Current .Nav.PageCount %}
+					<a class="layui-btn layui-btn-normal" href="/index.html?page={% .Nav.Next %}">下一页</a>
+					{% end %}
+				</div>
+			</div>
+		</div>
+
+		{% template "foot.htm" .%}
+
+	</body>
+</html>

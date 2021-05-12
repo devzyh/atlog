@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<title>{% .Data.NTitle %} - {% .HTML.TITLE %}</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<link rel="stylesheet" href="/static/layui/css/layui.css">
+		<link rel="stylesheet" href="/static/blog/css/main.css">
+		<link rel="stylesheet" href="/static/sme/github.css">
+		<link rel="stylesheet" href="/static/blog/css/idea.css">
+	</head>
+	<body class="lay-blog">
+
+		{% template "head.htm" .%}
+
+		<div class="container-wrap">
+			<div class="container">
+				<div class="contar-wrap">
+					<div class="item">
+						<div class="item-box  layer-photos-demo1 layer-photos-demo">
+							<h1>
+								{% if .Data.Single %}
+								<a href="/page/{% .Data.NUrl %}.html">
+								{% else %}
+								<a href="/page/{% .Data.NID %}.html">
+								{% end %}
+								{% .Data.NTitle %}
+								</a>
+							</h1>
+							<h5>发布于：<span>{% .Data.NTime %}</span></h5>
+							<ul class="page-dir"></ul>
+							<div id="content" class="markdown-body">
+								{% .Data.NText %}
+							</div>
+						</div>
+					</div>
+					
+					{% if not .Data.Single %}
+						{% range .Data.Tags %}
+							<a href="/list/{% .TID %}.html" class="layui-btn layui-btn-primary layui-btn-radius">{% .TName %}</a>
+						{% end %}
+					{% end %}
+	
+					{% template "message.htm" .%}
+				</div>
+			</div>
+		</div>
+
+		{% template "foot.htm" .%}
+		<script src="/static/blog/js/highlight.pack.js"></script>
+		<script type="text/javascript">
+			hljs.initHighlightingOnLoad();
+			var nid = {% .Data.NID %};
+			layui.config({
+				base: '/static/blog/js/'
+			}).use('talk');
+		</script>
+	</body>
+</html>

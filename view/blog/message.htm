@@ -1,0 +1,46 @@
+<div id="comment">
+	<br/>
+	<div class="container container-message">
+		<div id="contar-wrap">
+			{% if not .Data.NoTalk %}
+			<div class="layui-form">
+				<div class="layui-form-pane" style="font-size:15px;color: #787878;">
+					<div class="layui-form-item">
+						<label class="layui-form-label">昵称：</label>
+						<div class="layui-input-block">
+							<input type="text" id="txt-nick" placeholder="必填，昵称" class="layui-input">
+						</div>
+					</div>
+					<div class="layui-form-item">
+						<label class="layui-form-label">签名：</label>
+						<div class="layui-input-block">
+							<input type="text" id="txt-mark" placeholder="选填，签名" class="layui-input">
+						</div>
+					</div>
+				</div>
+				<div class="layui-form-item layui-form-text">
+					<textarea class="layui-textarea" placeholder="必填，评论内容" id="txt-msg" style="resize:none"></textarea>
+				</div>
+			</div>
+			<div class="item-btn">
+				<button class="layui-btn layui-btn-normal" id="btnTalk">提交评论</button>
+			</div>
+			{% end %}
+			
+			<div id="msg-box"></div>
+			<script type="text/html" id="talk-item">
+				<div class="info-item">
+					<p class="title count">
+						<span class="name">{{d.MNick}}（{{d.MMark}}）</span>
+						<span class="name" style="cursor: pointer;color: #1E9FFF;" id="at-msg" data-id="{{d.MID}}">回复</span>
+						<span class="info-img like"><i class="layui-icon"></i>{{d.MTime}}</span>
+					</p>
+					<p class="info-intr">{{d.MText}}</p>
+				</div>
+			</script>
+			
+			<div id="talk-nav-div" class="paging"></div>
+		</div>
+	</div>
+</div>
+

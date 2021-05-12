@@ -1,0 +1,88 @@
+/* 小屏适配 */
+@media screen and (max-width: 500px) {
+    .login-main {
+        width: 100%;
+        margin: auto;
+    }
+
+    .login-input {
+        margin: 1rem 1rem;
+    }
+
+    .login-icon {
+        width: 3rem;
+        height: 3rem;
+        border-radius: 1.5rem;
+    }
+
+    .login-icon-user {
+        line-height: 3rem;
+        font-size: 2rem;
+    }
+}
+
+/* 大屏适配 */
+@media screen and (min-width: 500px) {
+    .login-main {
+        width: 25rem;
+        position: absolute;
+        top: 45%;
+        left: 50%;
+        margin-top: -12.5rem;
+        margin-left: -12.5rem;
+    }
+
+    .login-input {
+        margin: 1.875rem 4rem;
+    }
+
+    .login-icon {
+        width: 5rem;
+        height: 5rem;
+        border-radius: 2.5rem;
+    }
+
+    .login-icon-user {
+        line-height: 5rem;
+        font-size: 3rem;
+    }
+}
+
+/* 公共样式 */
+.login-icon {
+    margin: auto;
+    background-color: #ffb800;
+    text-align: center;
+    margin-top: 2rem;
+}
+
+.login-icon-user {
+    color: white;
+}
+
+
+.login-input-btn {
+    width: 100%;
+    margin-bottom: 3rem;
+}
+
+.share-opt {
+    padding: 0.625rem 0rem;
+    text-align: right;
+}
+
+
+.layui-body{
+    padding: 0px 10px;
+}
+
+#editor li{
+    list-style: disc;
+}
+
+.markdown-body ul li{
+    list-style: disc !important;
+}
+.markdown-body ol li{
+    list-style-type: decimal !important;
+}

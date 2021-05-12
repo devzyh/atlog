@@ -1,0 +1,90 @@
+{% define "share" %}
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+		<title>快速分享 - AtLog</title>
+		<link rel="stylesheet" href="/static/layui/css/layui.css">
+		<link rel="stylesheet" href="/static/man/css/style.css">
+	</head>
+
+	<body class="layui-layout-body">
+		<div class="layui-layout layui-layout-admin">
+			{% template "head" . %}
+			<div class="layui-body">
+				<div style="padding: 15px;">
+					<textarea id="share" style="display: none;"></textarea>
+					<div class="layui-form share-opt">
+						<button class="layui-btn layui-btn-sm" id="btnShare">
+							<i class="layui-icon layui-icon-share"></i>
+							立即分享
+						</button>
+					</div>
+					<br />
+					<ul class="layui-timeline">
+						{% range .Data %}
+						<li class="layui-timeline-item">
+							<i class="layui-icon layui-timeline-axis">&#xe63f;</i>
+							<div class="layui-timeline-content layui-text">
+								<h3 class="layui-timeline-title">{% .STime %}</h3>
+								{% .SText %}
+							</div>
+						</li>
+						{% end %}
+
+					</ul>
+					{% if gt .Rows 20 %}
+					<a href="/share.html" target="_blank" class="layui-btn  layui-btn-fluid">查看更多...</a>
+					{% end %}
+				</div>
+			</div>
+
+			{% template "foot" . %}
+
+		</div>
+		<script>
+			layui.use(['layedit', 'layer', 'jquery'], function() {
+				var layedit = layui.layedit;
+				var layer = layui.layer;
+				var $ = layui.$;
+				$("#nav-share").addClass('layui-this');
+
+				// 新建编辑器
+				var index = layedit.build('share', {
+					tool: ['strong', 'italic', 'underline', 'del', 'link', 'unlink', 'face', 'image'],
+					height: 180,
+					uploadImage: {
+						url: '/rest/share/img'
+					}
+				});
+
+				// 添加笔记
+				$("#btnShare").click(function() {
+					var shareText = layedit.getContent(index)
+					if (!shareText.trim()) {
+						layer.msg("请输入笔记内容！");
+						return;
+					}
+					$.ajax({
+						type: "POST",
+						url: "/rest/share",
+						contentType: 'application/json;charset=utf-8',
+						data: JSON.stringify({
+							"SText": shareText.trim()
+						}),
+						success: function(data) {
+							if (data.Status) {
+								location.reload();
+							}
+							layer.msg(data.Message);
+						}
+					});
+				});
+			});
+		</script>
+	</body>
+
+</html>
+{% end %}

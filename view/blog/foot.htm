@@ -1,0 +1,56 @@
+<div class="footer">
+	<p>
+		<span>&copy; 2020 </span>
+		<span>Power By
+			<a href="https://gitee.com/rebootok/atlog" target="_blank"> AtLog </a>&
+			<a href="https://www.layui.com/" target="_blank"> LayUI</a>
+		</span>
+		<span>
+			<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1278547461&web_id=1278547461"></script>
+		</span>
+	</p>
+	<p><span>一切从简，实用至上！</span></p>
+</div>
+
+<script src="/static/man/js/jquery.min.js"></script>
+<script src="/static/layui/layui.js"></script>
+<script>
+	
+	$(function() {
+		var path = window.location.pathname;
+		if (path == "/" || path == "/index.html") {
+			$("#index").addClass("layui-this");
+		} else if (path == "/tag.html") {
+			$("#tag").addClass("layui-this");
+		}else if (path == "/share.html") {
+			$("#share").addClass("layui-this");
+		}else if (path == "/page/about.html") {
+			$("#about").addClass("layui-this");
+		}
+	});
+	
+	$("#mobile-nav").on('click', function() {
+		$("#pop-nav").toggle();
+	});
+	$("#btnSearch").click(function() {
+		location.href = "/search.html?key=" + $("#searchKey").val().trim();
+	});
+	$("#searchKey").on('keyup', function(event) {
+		if (event.keyCode == 13) {
+			$("#btnSearch").trigger("click");
+		}
+	});
+
+	// 返回顶部
+	layui.use("util",function () {
+		var util = layui.util;
+		util.fixbar({
+			top: true,
+			css: {
+				right: 15,
+				bottom: 35
+			},
+			bgcolor: '#1e9fff'
+		});
+	})
+</script>

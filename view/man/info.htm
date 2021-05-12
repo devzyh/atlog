@@ -1,0 +1,137 @@
+{% define "info" %}
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+		<title>资料设置 - AtLog</title>
+		<link rel="stylesheet" href="/static/layui/css/layui.css">
+		<link rel="stylesheet" href="/static/man/css/style.css">
+	</head>
+
+	<body class="layui-layout-body">
+		<div class="layui-layout layui-layout-admin">
+			{% template "head" . %}
+			<div class="layui-body">
+				<fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+					<legend>资料设置</legend>
+				</fieldset>
+				<div class="layui-form">
+					<div class="layui-form-item layui-form-text">
+						<label class="layui-form-label">头像</label>
+						<div class="layui-input-block">
+							<div class="layui-upload">
+								<button type="button" class="layui-btn layui-btn-primary layui-btn-sm" id="btnAvatar">上传头像</button>
+								<div class="layui-upload-list">
+									<img class="layui-upload-img" width="260px" id="avatar" src="{% .HTML.AVATAR %}">
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="layui-form-item">
+						<label class="layui-form-label">网名</label>
+						<div class="layui-input-inline">
+							<input type="text" id="nick" value="{% .HTML.NICK %}" class="layui-input">
+						</div>
+					</div>
+					<div class="layui-form-item">
+						<label class="layui-form-label">邮箱</label>
+						<div class="layui-input-inline">
+							<input type="text" id="email" value="{% .HTML.EMAIL %}" class="layui-input">
+						</div>
+					</div>
+					<div class="layui-form-item layui-form-text">
+						<label class="layui-form-label">签名</label>
+						<div class="layui-input-block" style="padding-right: 5rem;">
+							<textarea placeholder="请输入你的个人签名,支持HTML代码..." id="summary" class="layui-textarea">{% .HTML.SUMMARY %}</textarea>
+						</div>
+					</div>
+					<div class="layui-form-item layui-form-text">
+						<label class="layui-form-label"></label>
+						<div class="layui-input-inline">
+							<button class="layui-btn" id="btnUpInfo">更新我的资料</button>
+						</div>
+					</div>
+				</div>
+			</div>
+			{% template "foot" . %}
+		</div>
+	</body>
+
+	<script>
+		layui.use(['jquery', 'layer', 'upload'], function() {
+			var $ = layui.$;
+			var layer = layui.layer;
+			var upload = layui.upload;
+
+			// 上传图像按钮
+			upload.render({
+				elem: '#btnAvatar',
+				url: '/rest/config/info/img',
+				done: function(res) {
+					if(res.Status){
+						 $("#avatar").attr('src',res.Data);
+					}else{
+						layer.msg(res.Message);
+					}
+				}
+			});
+
+			// 更新资料
+			$("#btnUpInfo").click(function() {
+				if ($("#avatar").attr('src').length == 0) {
+					layer.msg('请上传头像');
+					return;
+				}
+				if (!$("#nick").val().trim()) {
+					layer.msg('请输入网名');
+					return;
+				}
+				if (!$("#email").val().trim()) {
+					layer.msg('请输入联系邮箱');
+					return;
+				}
+				var reg = /^\w+((-\w+)|(\.\w+))*\@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z0-9]+$/;
+				if (!reg.test($("#email").val())) {
+					layer.msg("邮箱格式不对");
+					return;
+				}
+				if (!$("#summary").val().trim()) {
+					layer.msg('请输入个人签名');
+					return;
+				}
+
+				$.ajax({
+					type: "PUT",
+					url: "/rest/config/info",
+					contentType: 'application/json;charset=utf-8',
+					data: JSON.stringify(
+						[{
+							"CKey": "AVATAR",
+							"CVal": $("#avatar").attr('src')
+						}, {
+							"CKey": "NICK",
+							"CVal": $("#nick").val()
+						}, {
+							"CKey": "EMAIL",
+							"CVal": $("#email").val()
+						}, {
+							"CKey": "SUMMARY",
+							"CVal": $("#summary").val()
+						}]
+					),
+					success: function(data) {
+						layer.alert(data.Message, function(index){
+							if (data.Status){
+								location.reload()
+							}
+						  layer.close(index);
+						});   
+					}
+				});
+
+			});
+		});
+	</script>
+</html>
+{% end %}
